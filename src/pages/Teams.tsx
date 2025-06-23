@@ -1,92 +1,26 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Navigation from '@/components/Navigation';
+import ApplicationDialog from '@/components/ApplicationDialog';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { getTeams, checkExistingApplication } from '@/services/teamsService';
 import { Search, Users, DollarSign, Clock, MapPin, Calendar, Music, BookOpen, Home, Plane } from 'lucide-react';
 
 const Teams = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTeamType, setFilterTeamType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  // Mock data - will be replaced with real data from Supabase
-  const mockTeams = [
-    {
-      id: 1,
-      name: "AI-Powered Recipe App",
-      description: "Building a smart recipe recommendation app using machine learning. Looking for passionate developers to join our team!",
-      team_type: "project_startup",
-      skills_needed: ["React", "Python", "Machine Learning"],
-      is_paid: true,
-      team_size: 4,
-      status: "open",
-      creator: "Sarah Chen",
-      deadline: "2024-08-15"
-    },
-    {
-      id: 2,
-      name: "Weekly Basketball Team",
-      description: "Looking for players to join our weekly basketball games. All skill levels welcome!",
-      team_type: "sports",
-      sport_type: "Basketball",
-      schedule: "Every Wednesday 7PM",
-      location: "Central Park Courts",
-      team_size: 10,
-      status: "open",
-      creator: "Mike Johnson"
-    },
-    {
-      id: 3,
-      name: "2BR Apartment in Brooklyn",
-      description: "Looking for a roommate to share a beautiful 2BR apartment in Brooklyn. Great location near subway.",
-      team_type: "housing",
-      city: "Brooklyn, NY",
-      rent_budget: 1200,
-      gender_preference: "Any",
-      room_type: "Private bedroom",
-      team_size: 2,
-      status: "open",
-      creator: "Emma Davis"
-    },
-    {
-      id: 4,
-      name: "Indie Rock Band",
-      description: "Established indie rock band looking for a bassist. We practice twice a week and gig monthly.",
-      team_type: "music",
-      genre: "Indie Rock",
-      instruments_needed: ["Bass Guitar"],
-      team_size: 4,
-      status: "open",
-      creator: "Alex Rodriguez"
-    },
-    {
-      id: 5,
-      name: "Data Science Study Group",
-      description: "Weekly study group for data science certification prep. Working through Python and ML concepts together.",
-      team_type: "study",
-      subject: "Data Science",
-      study_level: "Intermediate",
-      team_size: 6,
-      status: "open",
-      creator: "Lisa Wang"
-    },
-    {
-      id: 6,
-      name: "Japan Trip Summer 2024",
-      description: "Planning a 2-week trip to Japan this summer. Looking for travel buddies to share costs and experiences!",
-      team_type: "travel",
-      destination: "Japan",
-      travel_dates: "July 15-29, 2024",
-      budget_range: "$3000-4000",
-      team_size: 4,
-      status: "open",
-      creator: "Tom Chen"
-    }
-  ];
+  const [teams, setTeams] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const teamTypeLabels = {
     project_startup: "Project/Startup",
@@ -110,7 +44,56 @@ const Teams = () => {
     }
   };
 
-  const filteredTeams = mockTeams.filter(team => {
+  useEffect(() => {
+    loadTeams();
+  }, []);
+
+  useEffect(() => {
+    if (user && teams.length > 0) {
+      loadUserApplications();
+    }
+  }, [user, teams]);
+
+  const loadTeams = async () => {
+    try {
+      const teamsData = await getTeams();
+      setTeams(teamsData || []);
+    } catch (error) {
+      console.error('Error loading teams:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load teams. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUserApplications = async () => {
+    if (!user) return;
+    
+    try {
+      const applicationsData: Record<string, any> = {};
+      
+      for (const team of teams) {
+        const existingApp = await checkExistingApplication(team.id, user.id);
+        if (existingApp) {
+          applicationsData[team.id] = existingApp;
+        }
+      }
+      
+      setApplications(applicationsData);
+    } catch (error) {
+      console.error('Error loading applications:', error);
+    }
+  };
+
+  const handleApplicationSuccess = () => {
+    loadUserApplications();
+  };
+
+  const filteredTeams = teams.filter(team => {
     const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          team.description.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -119,10 +102,6 @@ const Teams = () => {
     
     return matchesSearch && matchesType && matchesStatus;
   });
-
-  const handleApply = (teamId: number) => {
-    console.log('Applying to team:', teamId);
-  };
 
   const renderTeamSpecificInfo = (team: any) => {
     switch (team.team_type) {
@@ -143,7 +122,7 @@ const Teams = () => {
                 </div>
               )}
             </div>
-            {team.skills_needed && (
+            {team.skills_needed && team.skills_needed.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">Skills Needed:</p>
                 <div className="flex flex-wrap gap-1">
@@ -225,7 +204,7 @@ const Teams = () => {
                 <Badge variant="outline">{team.genre}</Badge>
               </div>
             )}
-            {team.instruments_needed && (
+            {team.instruments_needed && team.instruments_needed.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">Instruments Needed:</p>
                 <div className="flex flex-wrap gap-1">
@@ -290,6 +269,92 @@ const Teams = () => {
         return null;
     }
   };
+
+  const renderActionButton = (team: any) => {
+    if (!user) {
+      return (
+        <Button 
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          onClick={() => window.location.href = '/login'}
+        >
+          Login to Apply
+        </Button>
+      );
+    }
+
+    if (user.id === team.creator_id) {
+      return (
+        <Button 
+          variant="outline"
+          className="w-full"
+          disabled
+        >
+          Your Team
+        </Button>
+      );
+    }
+
+    const existingApplication = applications[team.id];
+    
+    if (existingApplication) {
+      const statusColors = {
+        pending: 'bg-yellow-100 text-yellow-800',
+        accepted: 'bg-green-100 text-green-800',
+        rejected: 'bg-red-100 text-red-800'
+      };
+      
+      return (
+        <Button 
+          variant="outline"
+          className="w-full"
+          disabled
+        >
+          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${statusColors[existingApplication.status as keyof typeof statusColors]}`}>
+            {existingApplication.status === 'pending' && 'Application Pending'}
+            {existingApplication.status === 'accepted' && 'Application Accepted'}
+            {existingApplication.status === 'rejected' && 'Application Rejected'}
+          </span>
+        </Button>
+      );
+    }
+
+    if (team.status === 'closed') {
+      return (
+        <Button 
+          className="w-full"
+          disabled
+        >
+          Team Full
+        </Button>
+      );
+    }
+
+    return (
+      <ApplicationDialog 
+        teamId={team.id} 
+        teamName={team.name}
+        onApplicationSuccess={handleApplicationSuccess}
+      >
+        <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          Apply to Join
+        </Button>
+      </ApplicationDialog>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading teams...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -372,25 +437,21 @@ const Teams = () => {
                   <div className="flex items-center justify-between pt-2 border-t">
                     <div className="flex items-center text-sm text-gray-500">
                       <Users className="w-4 h-4 mr-1" />
-                      Team Size: {team.team_size}
+                      Team Size: {team.team_size || 'N/A'}
                     </div>
-                    <p className="text-xs text-gray-500">by {team.creator}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(team.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                   
-                  <Button 
-                    onClick={() => handleApply(team.id)}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    disabled={team.status === 'closed'}
-                  >
-                    {team.status === 'closed' ? 'Team Full' : 'Apply to Join'}
-                  </Button>
+                  {renderActionButton(team)}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {filteredTeams.length === 0 && (
+        {filteredTeams.length === 0 && !loading && (
           <div className="text-center py-12">
             <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No teams found</h3>
