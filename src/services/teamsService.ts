@@ -1,10 +1,12 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
+
+type TeamType = Database['public']['Enums']['team_type'];
 
 export interface CreateTeamData {
   name: string;
   description: string;
-  team_type: string;
+  team_type: TeamType;
   team_size?: number;
   skills_needed?: string[];
   is_paid?: boolean;
@@ -34,10 +36,10 @@ export const createTeam = async (teamData: CreateTeamData) => {
 
   const { data, error } = await supabase
     .from('teams')
-    .insert([{
+    .insert({
       ...teamData,
       creator_id: user.id,
-    }])
+    })
     .select()
     .single();
 
