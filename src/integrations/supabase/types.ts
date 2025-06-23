@@ -9,7 +9,128 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      team_applications: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          id: string
+          message: string | null
+          status: string | null
+          team_id: string
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: string | null
+          team_id: string
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_applications_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          budget_range: string | null
+          city: string | null
+          created_at: string
+          creator_id: string
+          deadline: string | null
+          description: string
+          destination: string | null
+          gender_preference: string | null
+          genre: string | null
+          id: string
+          instruments_needed: string[] | null
+          is_paid: boolean | null
+          location: string | null
+          name: string
+          rent_budget: number | null
+          room_type: string | null
+          schedule: string | null
+          skills_needed: string[] | null
+          sport_type: string | null
+          status: string | null
+          study_level: string | null
+          subject: string | null
+          team_size: number | null
+          team_type: Database["public"]["Enums"]["team_type"]
+          travel_dates: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget_range?: string | null
+          city?: string | null
+          created_at?: string
+          creator_id: string
+          deadline?: string | null
+          description: string
+          destination?: string | null
+          gender_preference?: string | null
+          genre?: string | null
+          id?: string
+          instruments_needed?: string[] | null
+          is_paid?: boolean | null
+          location?: string | null
+          name: string
+          rent_budget?: number | null
+          room_type?: string | null
+          schedule?: string | null
+          skills_needed?: string[] | null
+          sport_type?: string | null
+          status?: string | null
+          study_level?: string | null
+          subject?: string | null
+          team_size?: number | null
+          team_type: Database["public"]["Enums"]["team_type"]
+          travel_dates?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: string | null
+          city?: string | null
+          created_at?: string
+          creator_id?: string
+          deadline?: string | null
+          description?: string
+          destination?: string | null
+          gender_preference?: string | null
+          genre?: string | null
+          id?: string
+          instruments_needed?: string[] | null
+          is_paid?: boolean | null
+          location?: string | null
+          name?: string
+          rent_budget?: number | null
+          room_type?: string | null
+          schedule?: string | null
+          skills_needed?: string[] | null
+          sport_type?: string | null
+          status?: string | null
+          study_level?: string | null
+          subject?: string | null
+          team_size?: number | null
+          team_type?: Database["public"]["Enums"]["team_type"]
+          travel_dates?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +139,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      team_type:
+        | "project_startup"
+        | "sports"
+        | "housing"
+        | "music"
+        | "study"
+        | "travel"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +261,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      team_type: [
+        "project_startup",
+        "sports",
+        "housing",
+        "music",
+        "study",
+        "travel",
+        "other",
+      ],
+    },
   },
 } as const
