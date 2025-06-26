@@ -4,14 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate } from 'react-router-dom';
-import { Users, Plus, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import { Users, Settings, Bell, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  
   // Mock data - will be replaced with Supabase data
   const myTeams = [
     {
@@ -52,35 +48,6 @@ const Dashboard = () => {
       status: "accepted",
       appliedDate: "2024-01-10",
       message: "I have experience with local SEO and marketing."
-    },
-    {
-      id: 3,
-      teamName: "StudyBuddy",
-      description: "Platform for students to find study partners",
-      status: "rejected",
-      appliedDate: "2024-01-08",
-      message: "I'd love to help with the UI/UX design."
-    }
-  ];
-
-  const teamApplications = [
-    {
-      id: 1,
-      applicantName: "Alex Chen",
-      applicantRole: "UI/UX Designer",
-      teamName: "AI Recipe App",
-      message: "I'm passionate about food and have 3 years of design experience. I'd love to create an intuitive interface for your recipe app.",
-      status: "pending",
-      appliedDate: "2024-01-16"
-    },
-    {
-      id: 2,
-      applicantName: "Maria Rodriguez",
-      applicantRole: "Marketing Manager",
-      teamName: "AI Recipe App",
-      message: "I specialize in food industry marketing and have launched 5 successful food apps. I can help with user acquisition and branding.",
-      status: "pending",
-      appliedDate: "2024-01-14"
     }
   ];
 
@@ -103,79 +70,66 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Navigation />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="sticky top-0 bg-white border-b border-gray-200 z-40 p-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-black">TeamFinder</h1>
+          <div className="flex items-center space-x-3">
+            <Button variant="ghost" size="icon">
+              <Bell className="w-6 h-6" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Settings className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 space-y-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-2">Manage your teams and applications</p>
-            </div>
-            <Button 
-              onClick={() => navigate('/create-team')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Team
-            </Button>
-          </div>
-
-          <Tabs defaultValue="my-teams" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="my-teams">My Teams</TabsTrigger>
-              <TabsTrigger value="my-applications">My Applications</TabsTrigger>
-              <TabsTrigger value="team-applications">Team Applications</TabsTrigger>
+          <Tabs defaultValue="my-teams" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+              <TabsTrigger value="my-teams" className="text-sm">My Teams</TabsTrigger>
+              <TabsTrigger value="my-applications" className="text-sm">Applications</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="my-teams" className="space-y-4">
+            <TabsContent value="my-teams" className="space-y-3">
               {myTeams.length > 0 ? (
-                <div className="grid gap-4">
+                <div className="space-y-3">
                   {myTeams.map((team) => (
-                    <Card key={team.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
+                    <Card key={team.id} className="border border-gray-200 shadow-sm">
+                      <CardHeader className="pb-3">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="flex items-center gap-2">
-                              {team.name}
-                              <Badge variant={team.isPaid ? "default" : "secondary"}>
-                                {team.isPaid ? 'Paid' : 'Volunteer'}
-                              </Badge>
-                            </CardTitle>
-                            <CardDescription className="mt-2">{team.description}</CardDescription>
+                          <div className="flex-1">
+                            <CardTitle className="text-lg font-semibold">{team.name}</CardTitle>
+                            <CardDescription className="text-sm text-gray-600 mt-1">
+                              {team.description}
+                            </CardDescription>
                           </div>
-                          <Badge variant="outline" className="text-blue-600 border-blue-200">
-                            {team.role}
+                          <Badge variant={team.isPaid ? "default" : "secondary"} className="ml-2">
+                            {team.isPaid ? 'Paid' : 'Volunteer'}
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="pt-0">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
-                              {team.membersCount} members
+                              {team.membersCount}
                             </div>
-                            <div className="flex gap-1">
-                              {team.skillsNeeded.slice(0, 2).map((skill) => (
-                                <Badge key={skill} variant="outline" className="text-xs">
-                                  {skill}
-                                </Badge>
-                              ))}
-                              {team.skillsNeeded.length > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{team.skillsNeeded.length - 2} more
-                                </Badge>
-                              )}
-                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {team.role}
+                            </Badge>
                           </div>
                           <Button variant="outline" size="sm">
-                            View Team
+                            View
                           </Button>
                         </div>
                       </CardContent>
@@ -183,36 +137,26 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <CardTitle className="text-xl mb-2">No teams yet</CardTitle>
-                    <CardDescription className="mb-4">
-                      Create your first team or join an existing one to get started
-                    </CardDescription>
-                    <div className="flex gap-3 justify-center">
-                      <Button onClick={() => navigate('/create-team')}>
-                        Create Team
-                      </Button>
-                      <Button variant="outline" onClick={() => navigate('/teams')}>
-                        Browse Teams
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="text-center py-12">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No teams yet</h3>
+                  <p className="text-gray-600 mb-4">Create your first team to get started</p>
+                </div>
               )}
             </TabsContent>
 
-            <TabsContent value="my-applications" className="space-y-4">
+            <TabsContent value="my-applications" className="space-y-3">
               {myApplications.length > 0 ? (
-                <div className="grid gap-4">
+                <div className="space-y-3">
                   {myApplications.map((application) => (
-                    <Card key={application.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
+                    <Card key={application.id} className="border border-gray-200 shadow-sm">
+                      <CardHeader className="pb-3">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle>{application.teamName}</CardTitle>
-                            <CardDescription className="mt-2">{application.description}</CardDescription>
+                          <div className="flex-1">
+                            <CardTitle className="text-lg font-semibold">{application.teamName}</CardTitle>
+                            <CardDescription className="text-sm text-gray-600 mt-1">
+                              {application.description}
+                            </CardDescription>
                           </div>
                           <Badge className={getStatusColor(application.status)}>
                             {getStatusIcon(application.status)}
@@ -220,84 +164,21 @@ const Dashboard = () => {
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-3">"{application.message}"</p>
+                      <CardContent className="pt-0">
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Calendar className="w-3 h-3" />
-                          Applied on {new Date(application.appliedDate).toLocaleDateString()}
+                          Applied {new Date(application.appliedDate).toLocaleDateString()}
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <CardTitle className="text-xl mb-2">No applications yet</CardTitle>
-                    <CardDescription className="mb-4">
-                      Start applying to teams that match your skills and interests
-                    </CardDescription>
-                    <Button onClick={() => navigate('/teams')}>
-                      Browse Teams
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="team-applications" className="space-y-4">
-              {teamApplications.length > 0 ? (
-                <div className="grid gap-4">
-                  {teamApplications.map((application) => (
-                    <Card key={application.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="flex items-center gap-2">
-                              {application.applicantName}
-                              <Badge variant="outline">{application.applicantRole}</Badge>
-                            </CardTitle>
-                            <CardDescription className="mt-1">
-                              Applied to: {application.teamName}
-                            </CardDescription>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(application.appliedDate).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-700 mb-4">"{application.message}"</p>
-                        <div className="flex gap-2">
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                            Accept
-                          </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                            Reject
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            View Profile
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="text-center py-12">
+                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No applications yet</h3>
+                  <p className="text-gray-600 mb-4">Start applying to teams</p>
                 </div>
-              ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <CardTitle className="text-xl mb-2">No applications yet</CardTitle>
-                    <CardDescription className="mb-4">
-                      When people apply to your teams, you'll see their applications here
-                    </CardDescription>
-                    <Button onClick={() => navigate('/create-team')}>
-                      Create Your First Team
-                    </Button>
-                  </CardContent>
-                </Card>
               )}
             </TabsContent>
           </Tabs>
